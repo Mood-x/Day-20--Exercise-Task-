@@ -19,36 +19,57 @@ public class TaskListController {
 
     @PostMapping("/add")
     public ApiResponse addBankManagement(@RequestBody TaskList task){
+        for (TaskList taskId : tasks) {
+            if(taskId.getId().equalsIgnoreCase(task.getId())){
+                return new ApiResponse("This id already exists");
+            }
+        }
         tasks.add(task);
         return new ApiResponse("Successfully added " + task.getTitle() + " to the task list");
     }
+    
+    @PutMapping("/update/{id}")
+    public ApiResponse updateBankManagement(@PathVariable String id, @RequestBody TaskList task){
+        for(TaskList taskList : tasks){
+            if(taskList.getId().equalsIgnoreCase(id)){
+                taskList.setTitle(task.getTitle());
+                taskList.setDescription(task.getDescription());
+                taskList.setStatus(task.getStatus());
+                return new ApiResponse("Successfully updated " + task.getId());
 
+            }
+        }
+        return new ApiResponse("Account with this ID " + task.getId() + " not found");
 
-    @PutMapping("/update/{index}")
-    public ApiResponse updateBankManagement(@PathVariable int index, @RequestBody TaskList task){
-        tasks.set(index, task);
-        return new ApiResponse("Successfully updated " + task.getId());
     }
 
-    @DeleteMapping("/delete/{index}")
-    public ApiResponse deleteBankManagement(@PathVariable int index){
-        tasks.remove(index);
+    @DeleteMapping("/delete/{id}")
+    public ApiResponse deleteBankManagement(@PathVariable String id){
+        for(TaskList task: tasks){
+            if(task.getId().equalsIgnoreCase(id)){
+                tasks.remove(task);
+            }
+        }
         return new ApiResponse("Successfully deleted from the task list");
     }
 
 
-    @PutMapping("/change/{index}")
-    public ApiResponse changeStatus(@PathVariable int index, @RequestBody String status) {
-            TaskList task = tasks.get(index);
-            task.setStatus(status);
-            return new ApiResponse("Successfully changed status of task with ID " + task.getId());
+    @PutMapping("/change/{id}")
+    public ApiResponse changeStatus(@PathVariable String id, @RequestBody String status) {
+            for(TaskList task : tasks){
+                if(task.getId().equalsIgnoreCase(id)){
+                    task.setStatus(status);
+                    return new ApiResponse("Successfully changed status of task with ID " + id);
+                }
+            }
+        return new ApiResponse("Account with this " + id + " not found");
     }
 
     @PostMapping("/search")
         public ApiResponse searchTasks(@RequestBody String title){
             for(TaskList task : tasks){
-                if(task.getTitle().equals(title)){
-                    return new ApiResponse("It's Found ->" + title);
+                if(task.getTitle().equalsIgnoreCase(title)){
+                    return new ApiResponse("It's Found -> " + title + " with this ID: (" + task.getId() + ")");
                 }
             }
             return new ApiResponse("Task not found");
